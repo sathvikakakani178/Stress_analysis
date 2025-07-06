@@ -73,11 +73,10 @@ with st.sidebar:
         st.rerun()
 
 # Main tabs
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "🔬 Medical Assessment", 
     "📊 Advanced Analytics", 
     "📈 Real-time Monitoring",
-    "📋 Medical Reports",
     "🧠 Clinical Insights"
 ])
 
@@ -350,7 +349,7 @@ with tab3:
             
             # Generate sample time series data
             times = pd.date_range(start=current_time - datetime.timedelta(minutes=10), 
-                                 end=current_time, freq='30S')
+                                 end=current_time, freq='30s')
             
             live_data = pd.DataFrame({
                 'time': times,
@@ -413,144 +412,6 @@ with tab3:
             st.write('• Historical data logging')
 
 with tab4:
-    st.header('📋 Medical Reports & Documentation')
-    
-    if st.session_state.current_session['measurements']:
-        st.subheader('Generate Medical Report')
-        
-        # Report configuration
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            report_type = st.selectbox(
-                'Report Type',
-                ['Comprehensive Assessment', 'Stress Level Summary', 'Vital Signs Analysis', 'Risk Assessment']
-            )
-            
-            include_charts = st.checkbox('Include Charts and Visualizations', value=True)
-            
-        with col2:
-            patient_id = st.text_input('Patient ID (Optional)', placeholder='Enter patient identifier')
-            
-            report_format = st.selectbox('Export Format', ['PDF', 'HTML', 'CSV'])
-        
-        if st.button('📄 Generate Medical Report'):
-            with st.spinner('Generating comprehensive medical report...'):
-                time.sleep(3)
-                
-                # Generate report content
-                report_data = {
-                    'patient_id': patient_id or 'Anonymous',
-                    'report_type': report_type,
-                    'generation_time': datetime.datetime.now(),
-                    'session_data': st.session_state.current_session,
-                    'measurements': st.session_state.current_session['measurements']
-                }
-                
-                report_content = report_generator.generate_report(report_data, report_type)
-                
-                # Display report preview
-                st.success('✅ Medical Report Generated Successfully')
-                
-                # Report summary
-                st.subheader('📊 Report Summary')
-                
-                summary_cols = st.columns(4)
-                
-                with summary_cols[0]:
-                    total_measurements = len(st.session_state.current_session['measurements'])
-                    st.metric('Total Assessments', total_measurements)
-                
-                with summary_cols[1]:
-                    if total_measurements > 0:
-                        latest_stress = st.session_state.current_session['measurements'][-1]['result']['stress_level']
-                        st.metric('Latest Stress Level', latest_stress)
-                    else:
-                        st.metric('Latest Stress Level', 'N/A')
-                
-                with summary_cols[2]:
-                    if total_measurements > 0:
-                        avg_confidence = np.mean([m['result']['confidence'] for m in st.session_state.current_session['measurements']])
-                        st.metric('Average Confidence', f'{avg_confidence:.1%}')
-                    else:
-                        st.metric('Average Confidence', 'N/A')
-                
-                with summary_cols[3]:
-                    session_duration = datetime.datetime.now() - st.session_state.current_session['start_time']
-                    st.metric('Session Duration', f'{session_duration.seconds // 3600}h {(session_duration.seconds % 3600) // 60}m')
-                
-                # Report content preview
-                st.subheader('📄 Report Content Preview')
-                
-                with st.expander('View Report Content'):
-                    st.markdown(report_content['content'])
-                
-                # Download options
-                st.subheader('📥 Download Options')
-                
-                col1, col2, col3 = st.columns(3)
-                
-                with col1:
-                    if report_format == 'PDF':
-                        st.download_button(
-                            label='📄 Download PDF Report',
-                            data=report_content['pdf_data'] if 'pdf_data' in report_content else 'PDF generation placeholder',
-                            file_name=f'medical_report_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.pdf',
-                            mime='application/pdf'
-                        )
-                
-                with col2:
-                    if report_format == 'HTML':
-                        st.download_button(
-                            label='🌐 Download HTML Report',
-                            data=report_content['content'],
-                            file_name=f'medical_report_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.html',
-                            mime='text/html'
-                        )
-                
-                with col3:
-                    if report_format == 'CSV':
-                        # Convert measurements to CSV
-                        csv_data = pd.DataFrame([
-                            {
-                                'timestamp': m['timestamp'],
-                                'stress_level': m['result']['stress_level'],
-                                'confidence': m['result']['confidence'],
-                                'heart_rate': m['data']['heart_rate'],
-                                'breathing_rate': m['data']['breathing_rate'],
-                                'bp_systolic': m['data']['bp_systolic'],
-                                'bp_diastolic': m['data']['bp_diastolic'],
-                                'temperature': m['data']['temperature'],
-                                'oxygen_saturation': m['data']['oxygen_saturation']
-                            }
-                            for m in st.session_state.current_session['measurements']
-                        ])
-                        
-                        st.download_button(
-                            label='📊 Download CSV Data',
-                            data=csv_data.to_csv(index=False),
-                            file_name=f'medical_data_{datetime.datetime.now().strftime("%Y%m%d_%H%M%S")}.csv',
-                            mime='text/csv'
-                        )
-    
-    else:
-        st.info('📋 No data available for report generation. Please perform medical assessments first.')
-        
-        # Show report templates
-        st.subheader('Available Report Templates')
-        
-        template_info = {
-            'Comprehensive Assessment': 'Complete medical evaluation including all parameters and analysis',
-            'Stress Level Summary': 'Focused report on stress classification and trends',
-            'Vital Signs Analysis': 'Detailed analysis of vital signs and their correlations',
-            'Risk Assessment': 'Medical risk evaluation and recommendations'
-        }
-        
-        for template, description in template_info.items():
-            with st.expander(f'📄 {template}'):
-                st.write(description)
-
-with tab5:
     st.header('🧠 Clinical Insights & Recommendations')
     
     if st.session_state.current_session['measurements']:

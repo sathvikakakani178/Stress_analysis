@@ -96,6 +96,7 @@ The application is designed for deployment on Replit with the following consider
 
 - July 06, 2025: Initial setup
 - July 06, 2025: Simplified parameter structure to 5 essential health indicators (heart rate, systolic/diastolic blood pressure, sleep duration, stress symptoms) per user request
+- July 06, 2025: Removed medical reports tab to streamline interface
 
 ## User Preferences
 
