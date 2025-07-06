@@ -96,14 +96,11 @@ class MedicalParameterAnalyzer:
         Initialize clinical significance weights for each parameter
         """
         return {
-            'heart_rate': 0.25,
-            'bp_systolic': 0.20,
-            'bp_diastolic': 0.15,
-            'breathing_rate': 0.15,
-            'oxygen_saturation': 0.10,
-            'temperature': 0.08,
-            'sleep_duration': 0.05,
-            'sound_level': 0.02
+            'heart_rate': 0.35,
+            'bp_systolic': 0.25,
+            'bp_diastolic': 0.20,
+            'sleep_duration': 0.15,
+            'stress_symptoms': 0.05
         }
     
     def _initialize_clinical_interpretations(self):
@@ -357,10 +354,46 @@ class MedicalParameterAnalyzer:
         """
         results = {}
         
-        # Analyze each parameter
+        # Analyze each numerical parameter
         for parameter in self.reference_ranges.keys():
             if parameter in patient_data:
                 results[parameter] = self.analyze_parameter(parameter, patient_data[parameter])
+        
+        # Handle stress symptoms separately
+        if 'stress_symptoms' in patient_data:
+            symptoms = patient_data['stress_symptoms']
+            symptoms_count = len(symptoms) if symptoms else 0
+            
+            if symptoms_count == 0:
+                status = 'normal'
+                interpretation = 'No stress symptoms reported'
+                stress_impact = 'Minimal impact on stress'
+                recommendation = 'Continue current wellness practices'
+            elif symptoms_count <= 2:
+                status = 'low'
+                interpretation = 'Few stress symptoms present'
+                stress_impact = 'Low impact on stress levels'
+                recommendation = 'Monitor symptoms and practice stress reduction techniques'
+            elif symptoms_count <= 4:
+                status = 'high'
+                interpretation = 'Multiple stress symptoms present'
+                stress_impact = 'Moderate to high impact on stress levels'
+                recommendation = 'Implement stress management strategies and consider professional support'
+            else:
+                status = 'critical_high'
+                interpretation = 'Significant stress symptom burden'
+                stress_impact = 'High impact on stress levels and overall wellbeing'
+                recommendation = 'Seek professional medical or psychological evaluation'
+            
+            results['stress_symptoms'] = {
+                'status': status,
+                'value': f"{symptoms_count} symptoms: {', '.join(symptoms) if symptoms else 'None'}",
+                'normal_range': '0-2 symptoms',
+                'interpretation': interpretation,
+                'stress_impact': stress_impact,
+                'recommendation': recommendation,
+                'clinical_weight': self.parameter_weights.get('stress_symptoms', 0.0)
+            }
         
         return results
     

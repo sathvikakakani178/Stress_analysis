@@ -47,7 +47,7 @@ The application follows a modular architecture with clear separation of concerns
 ### Data Management
 
 - **Session Management**: Patient history tracking and current session monitoring
-- **Parameter Monitoring**: Real-time vital signs tracking (heart rate, blood pressure, respiratory rate, temperature, oxygen saturation)
+- **Parameter Monitoring**: Simplified essential health tracking (heart rate, blood pressure, sleep duration, stress symptoms)
 - **Validation System**: Comprehensive data validation with medical reference ranges
 
 ### User Interface
@@ -94,7 +94,8 @@ The application is designed for deployment on Replit with the following consider
 
 ## Changelog
 
-- July 06, 2025. Initial setup
+- July 06, 2025: Initial setup
+- July 06, 2025: Simplified parameter structure to 5 essential health indicators (heart rate, systolic/diastolic blood pressure, sleep duration, stress symptoms) per user request
 
 ## User Preferences
 

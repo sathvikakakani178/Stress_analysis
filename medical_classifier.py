@@ -25,14 +25,11 @@ class MedicalStressClassifier:
         Initialize medical parameter weights based on clinical significance
         """
         return {
-            'heart_rate': 0.25,      # High clinical significance
-            'bp_systolic': 0.20,     # High clinical significance
-            'bp_diastolic': 0.15,    # Moderate clinical significance
-            'breathing_rate': 0.15,  # Moderate clinical significance
-            'oxygen_saturation': 0.10, # Moderate clinical significance
-            'temperature': 0.08,     # Lower clinical significance for stress
-            'sleep_duration': 0.05,  # Lower clinical significance
-            'sound_level': 0.02      # Minimal clinical significance
+            'heart_rate': 0.35,      # High clinical significance
+            'bp_systolic': 0.25,     # High clinical significance
+            'bp_diastolic': 0.20,    # High clinical significance
+            'sleep_duration': 0.15,  # Moderate clinical significance
+            'stress_symptoms': 0.05  # Behavioral indicator
         }
     
     def _initialize_model(self):
@@ -73,48 +70,35 @@ class MedicalStressClassifier:
                 heart_rate = np.random.normal(72, 8)
                 bp_systolic = np.random.normal(115, 10)
                 bp_diastolic = np.random.normal(75, 8)
-                breathing_rate = np.random.normal(16, 2)
-                oxygen_saturation = np.random.normal(98, 1)
-                temperature = np.random.normal(37.0, 0.3)
                 sleep_duration = np.random.normal(8, 1)
-                sound_level = np.random.normal(45, 10)
+                symptoms_count = np.random.poisson(0.5)  # Few symptoms
                 label = 0  # Low stress
                 
             elif i < 2 * n_samples // 3:  # Medium stress
                 heart_rate = np.random.normal(85, 10)
                 bp_systolic = np.random.normal(130, 12)
                 bp_diastolic = np.random.normal(85, 10)
-                breathing_rate = np.random.normal(20, 3)
-                oxygen_saturation = np.random.normal(97, 1.5)
-                temperature = np.random.normal(37.2, 0.4)
                 sleep_duration = np.random.normal(6, 1.5)
-                sound_level = np.random.normal(60, 15)
+                symptoms_count = np.random.poisson(2)  # Moderate symptoms
                 label = 1  # Medium stress
                 
             else:  # High stress
                 heart_rate = np.random.normal(105, 15)
                 bp_systolic = np.random.normal(145, 15)
                 bp_diastolic = np.random.normal(95, 12)
-                breathing_rate = np.random.normal(25, 4)
-                oxygen_saturation = np.random.normal(96, 2)
-                temperature = np.random.normal(37.4, 0.5)
                 sleep_duration = np.random.normal(4, 1.5)
-                sound_level = np.random.normal(75, 20)
+                symptoms_count = np.random.poisson(4)  # Many symptoms
                 label = 2  # High stress
             
             # Ensure medical bounds
             heart_rate = np.clip(heart_rate, 50, 180)
             bp_systolic = np.clip(bp_systolic, 90, 200)
             bp_diastolic = np.clip(bp_diastolic, 60, 120)
-            breathing_rate = np.clip(breathing_rate, 10, 40)
-            oxygen_saturation = np.clip(oxygen_saturation, 85, 100)
-            temperature = np.clip(temperature, 36, 39)
             sleep_duration = np.clip(sleep_duration, 2, 12)
-            sound_level = np.clip(sound_level, 20, 100)
+            symptoms_count = np.clip(symptoms_count, 0, 7)
             
             data.append([
-                heart_rate, bp_systolic, bp_diastolic, breathing_rate,
-                oxygen_saturation, temperature, sleep_duration, sound_level
+                heart_rate, bp_systolic, bp_diastolic, sleep_duration, symptoms_count
             ])
             labels.append(label)
         
@@ -130,8 +114,7 @@ class MedicalStressClassifier:
         
         # Calculate feature importance
         feature_names = [
-            'heart_rate', 'bp_systolic', 'bp_diastolic', 'breathing_rate',
-            'oxygen_saturation', 'temperature', 'sleep_duration', 'sound_level'
+            'heart_rate', 'bp_systolic', 'bp_diastolic', 'sleep_duration', 'symptoms_count'
         ]
         
         self.feature_importance = dict(zip(feature_names, self.model.feature_importances_))
@@ -141,15 +124,14 @@ class MedicalStressClassifier:
         Prepare features from patient data for classification
         """
         # Extract numerical features
+        symptoms_count = len(patient_data.get('stress_symptoms', []))
+        
         features = [
             patient_data['heart_rate'],
             patient_data['bp_systolic'],
             patient_data['bp_diastolic'],
-            patient_data['breathing_rate'],
-            patient_data['oxygen_saturation'],
-            patient_data['temperature'],
             patient_data['sleep_duration'],
-            patient_data['sound_level']
+            symptoms_count
         ]
         
         return np.array(features).reshape(1, -1)
@@ -181,32 +163,7 @@ class MedicalStressClassifier:
             risk_score += 0.3
             risk_factors.append('Hypotension indicated')
         
-        # Respiratory rate assessment
-        rr = patient_data['breathing_rate']
-        if rr > 20:
-            risk_score += 0.2
-            risk_factors.append('Tachypnea detected')
-        elif rr < 12:
-            risk_score += 0.15
-            risk_factors.append('Bradypnea detected')
-        
-        # Oxygen saturation assessment
-        spo2 = patient_data['oxygen_saturation']
-        if spo2 < 95:
-            risk_score += 0.5
-            risk_factors.append('Hypoxemia detected')
-        elif spo2 < 97:
-            risk_score += 0.2
-            risk_factors.append('Mild oxygen desaturation')
-        
-        # Temperature assessment
-        temp = patient_data['temperature']
-        if temp > 37.5:
-            risk_score += 0.2
-            risk_factors.append('Fever detected')
-        elif temp < 36:
-            risk_score += 0.15
-            risk_factors.append('Hypothermia detected')
+
         
         # Sleep duration assessment
         sleep = patient_data['sleep_duration']
@@ -267,17 +224,13 @@ class MedicalStressClassifier:
         bp_deviation = abs(patient_data['bp_systolic'] - 115) / 115
         contributions['Blood Pressure'] = bp_deviation * feature_importance.get('bp_systolic', 0)
         
-        # Respiratory rate contribution
-        rr_deviation = abs(patient_data['breathing_rate'] - 16) / 16
-        contributions['Respiratory Rate'] = rr_deviation * feature_importance.get('breathing_rate', 0)
-        
         # Sleep duration contribution
         sleep_deviation = abs(patient_data['sleep_duration'] - 8) / 8
         contributions['Sleep Duration'] = sleep_deviation * feature_importance.get('sleep_duration', 0)
         
-        # Oxygen saturation contribution
-        spo2_deviation = abs(patient_data['oxygen_saturation'] - 98) / 98
-        contributions['Oxygen Saturation'] = spo2_deviation * feature_importance.get('oxygen_saturation', 0)
+        # Stress symptoms contribution
+        symptoms_count = len(patient_data.get('stress_symptoms', []))
+        contributions['Stress Symptoms'] = symptoms_count * feature_importance.get('symptoms_count', 0)
         
         # Return the factor with highest contribution
         return max(contributions, key=contributions.get)

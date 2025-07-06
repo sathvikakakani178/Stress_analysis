@@ -30,16 +30,7 @@ class MedicalDataValidator:
                 'clinical_max': 200,
                 'unit': 'bpm'
             },
-            'breathing_rate': {
-                'type': 'numeric',
-                'min_value': 5,
-                'max_value': 60,
-                'required': True,
-                'precision': 0,
-                'clinical_min': 8,
-                'clinical_max': 40,
-                'unit': 'breaths/min'
-            },
+
             'bp_systolic': {
                 'type': 'numeric',
                 'min_value': 60,
@@ -60,26 +51,7 @@ class MedicalDataValidator:
                 'clinical_max': 150,
                 'unit': 'mmHg'
             },
-            'temperature': {
-                'type': 'numeric',
-                'min_value': 32.0,
-                'max_value': 45.0,
-                'required': True,
-                'precision': 1,
-                'clinical_min': 35.0,
-                'clinical_max': 42.0,
-                'unit': '°C'
-            },
-            'oxygen_saturation': {
-                'type': 'numeric',
-                'min_value': 60.0,
-                'max_value': 100.0,
-                'required': True,
-                'precision': 1,
-                'clinical_min': 70.0,
-                'clinical_max': 100.0,
-                'unit': '%'
-            },
+
             'sleep_duration': {
                 'type': 'numeric',
                 'min_value': 0.0,
@@ -90,32 +62,7 @@ class MedicalDataValidator:
                 'clinical_max': 15.0,
                 'unit': 'hours'
             },
-            'sound_level': {
-                'type': 'numeric',
-                'min_value': 0.0,
-                'max_value': 150.0,
-                'required': False,
-                'precision': 1,
-                'clinical_min': 20.0,
-                'clinical_max': 120.0,
-                'unit': 'dB'
-            },
-            'caffeine_intake': {
-                'type': 'numeric',
-                'min_value': 0,
-                'max_value': 2000,
-                'required': False,
-                'precision': 0,
-                'clinical_min': 0,
-                'clinical_max': 1000,
-                'unit': 'mg'
-            },
-            'movement_activity': {
-                'type': 'categorical',
-                'allowed_values': ['Sedentary', 'Light', 'Moderate', 'Vigorous'],
-                'required': False,
-                'default': 'Sedentary'
-            },
+
             'stress_symptoms': {
                 'type': 'list',
                 'allowed_values': [
@@ -126,12 +73,7 @@ class MedicalDataValidator:
                 'required': False,
                 'max_items': 10
             },
-            'medications': {
-                'type': 'text',
-                'max_length': 500,
-                'required': False,
-                'allow_empty': True
-            }
+
         }
     
     def _initialize_medical_ranges(self):
@@ -162,28 +104,7 @@ class MedicalDataValidator:
                 'hypertension_stage2': (90, 120),
                 'hypertensive_crisis': (120, 150)
             },
-            'breathing_rate': {
-                'normal': (12, 20),
-                'bradypnea': (8, 12),
-                'tachypnea': (20, 30),
-                'severe_bradypnea': (0, 8),
-                'severe_tachypnea': (30, 60)
-            },
-            'temperature': {
-                'normal': (36.1, 37.2),
-                'hypothermia_mild': (35.0, 36.1),
-                'fever_low': (37.2, 38.0),
-                'fever_moderate': (38.0, 39.0),
-                'fever_high': (39.0, 40.0),
-                'hyperthermia': (40.0, 42.0)
-            },
-            'oxygen_saturation': {
-                'normal': (95, 100),
-                'mild_hypoxemia': (90, 95),
-                'moderate_hypoxemia': (85, 90),
-                'severe_hypoxemia': (70, 85),
-                'critical_hypoxemia': (0, 70)
-            },
+
             'sleep_duration': {
                 'normal': (7, 9),
                 'short_sleep': (6, 7),
@@ -217,24 +138,7 @@ class MedicalDataValidator:
                 'emergency_low': 30,
                 'emergency_high': 140
             },
-            'breathing_rate': {
-                'critical_low': 8,
-                'critical_high': 30,
-                'emergency_low': 6,
-                'emergency_high': 40
-            },
-            'temperature': {
-                'critical_low': 35.0,
-                'critical_high': 39.0,
-                'emergency_low': 34.0,
-                'emergency_high': 41.0
-            },
-            'oxygen_saturation': {
-                'critical_low': 90,
-                'critical_high': 100,
-                'emergency_low': 85,
-                'emergency_high': 100
-            }
+
         }
     
     def _validate_numeric_parameter(self, parameter: str, value: Any) -> Tuple[bool, List[str]]:

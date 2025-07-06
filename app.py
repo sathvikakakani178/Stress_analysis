@@ -87,65 +87,31 @@ with tab1:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.subheader('Primary Vital Signs')
+        st.subheader('Essential Health Parameters')
         heart_rate = st.number_input(
             '💓 Heart Rate (bpm)', 
             min_value=40, max_value=200, value=75,
             help="Normal range: 60-100 bpm for adults"
         )
         
-        breathing_rate = st.number_input(
-            '💨 Respiratory Rate (breaths/min)', 
-            min_value=8, max_value=50, value=16,
-            help="Normal range: 12-20 breaths/min for adults"
-        )
-        
         blood_pressure_systolic = st.number_input(
-            '🩸 Systolic BP (mmHg)', 
+            '🩸 Systolic Blood Pressure (mmHg)', 
             min_value=80, max_value=250, value=120,
             help="Normal range: 90-120 mmHg"
         )
         
         blood_pressure_diastolic = st.number_input(
-            '🩸 Diastolic BP (mmHg)', 
+            '🩸 Diastolic Blood Pressure (mmHg)', 
             min_value=40, max_value=150, value=80,
             help="Normal range: 60-80 mmHg"
         )
         
     with col2:
-        st.subheader('Secondary Parameters')
-        temperature = st.number_input(
-            '🌡️ Body Temperature (°C)', 
-            min_value=35.0, max_value=42.0, value=37.0, step=0.1,
-            help="Normal range: 36.1-37.2°C"
-        )
-        
-        oxygen_saturation = st.number_input(
-            '🫁 Oxygen Saturation (%)', 
-            min_value=70.0, max_value=100.0, value=98.0, step=0.1,
-            help="Normal range: 95-100%"
-        )
-        
+        st.subheader('Additional Indicators')
         sleep_duration = st.number_input(
             '💤 Sleep Duration (hours)', 
             min_value=0.0, max_value=24.0, value=7.5, step=0.5,
             help="Recommended: 7-9 hours for adults"
-        )
-        
-        movement_activity = st.selectbox(
-            '🚶‍♂️ Physical Activity Level',
-            ['Sedentary', 'Light', 'Moderate', 'Vigorous'],
-            help="Current activity level assessment"
-        )
-        
-    st.subheader('Environmental & Lifestyle Factors')
-    col3, col4 = st.columns(2)
-    
-    with col3:
-        sound_level = st.number_input(
-            '🔊 Environmental Sound Level (dB)', 
-            min_value=20.0, max_value=120.0, value=50.0,
-            help="Normal conversation: 60dB, Traffic: 80dB"
         )
         
         stress_symptoms = st.multiselect(
@@ -153,19 +119,6 @@ with tab1:
             ['Headache', 'Muscle Tension', 'Fatigue', 'Irritability', 
              'Difficulty Concentrating', 'Sleep Issues', 'Anxiety'],
             help="Select any symptoms currently experienced"
-        )
-        
-    with col4:
-        caffeine_intake = st.number_input(
-            '☕ Caffeine Intake (mg)', 
-            min_value=0, max_value=1000, value=100,
-            help="Average daily caffeine consumption"
-        )
-        
-        medications = st.text_area(
-            '💊 Current Medications',
-            placeholder="List any current medications (optional)",
-            help="Include any medications that might affect vital signs"
         )
     
     # Medical assessment button
@@ -176,29 +129,19 @@ with tab1:
             # Validate parameters
             validation_result = validator.validate_parameters({
                 'heart_rate': heart_rate,
-                'breathing_rate': breathing_rate,
                 'bp_systolic': blood_pressure_systolic,
                 'bp_diastolic': blood_pressure_diastolic,
-                'temperature': temperature,
-                'oxygen_saturation': oxygen_saturation,
                 'sleep_duration': sleep_duration,
-                'sound_level': sound_level,
-                'caffeine_intake': caffeine_intake
+                'stress_symptoms': stress_symptoms
             })
             
             if validation_result['valid']:
                 # Prepare data for classification
                 patient_data = {
                     'heart_rate': heart_rate,
-                    'breathing_rate': breathing_rate,
                     'bp_systolic': blood_pressure_systolic,
                     'bp_diastolic': blood_pressure_diastolic,
-                    'temperature': temperature,
-                    'oxygen_saturation': oxygen_saturation,
                     'sleep_duration': sleep_duration,
-                    'movement_activity': movement_activity,
-                    'sound_level': sound_level,
-                    'caffeine_intake': caffeine_intake,
                     'stress_symptoms': stress_symptoms,
                     'timestamp': datetime.datetime.now()
                 }
@@ -264,13 +207,9 @@ with tab2:
                 'stress_level': m['result']['stress_level'],
                 'confidence': m['result']['confidence'],
                 'heart_rate': m['data']['heart_rate'],
-                'breathing_rate': m['data']['breathing_rate'],
                 'bp_systolic': m['data']['bp_systolic'],
                 'bp_diastolic': m['data']['bp_diastolic'],
-                'temperature': m['data']['temperature'],
-                'oxygen_saturation': m['data']['oxygen_saturation'],
-                'sleep_duration': m['data']['sleep_duration'],
-                'sound_level': m['data']['sound_level']
+                'sleep_duration': m['data']['sleep_duration']
             }
             for m in st.session_state.current_session['measurements']
         ])
@@ -302,8 +241,7 @@ with tab2:
         
         # Vital signs correlation matrix
         st.subheader('Vital Signs Correlation Analysis')
-        vital_signs = ['heart_rate', 'breathing_rate', 'bp_systolic', 'bp_diastolic', 
-                      'temperature', 'oxygen_saturation']
+        vital_signs = ['heart_rate', 'bp_systolic', 'bp_diastolic', 'sleep_duration']
         
         if len(measurements_df) > 1:
             corr_matrix = measurements_df[vital_signs].corr()
@@ -321,7 +259,7 @@ with tab2:
         selected_params = st.multiselect(
             'Select parameters to analyze',
             vital_signs,
-            default=['heart_rate', 'breathing_rate']
+            default=['heart_rate', 'bp_systolic']
         )
         
         if selected_params:
